@@ -1,0 +1,143 @@
+{
+    "dataset_info": {
+        "total_samples": 150,
+        "classes": {
+            "0": "Hate Speech",
+            "1": "Offensive Language",
+            "2": "Neutral Language"
+        },
+        "class_counts": {
+            "Hate Speech": 50,
+            "Offensive Language": 50,
+            "Neutral Language": 50
+        },
+        "vocabulary_size": 1459
+    },
+    "logistic_regression": {
+        "name": "Logistic Regression (Primary Classifier)",
+        "accuracy": 76.67,
+        "report": {
+            "Hate Speech": {
+                "precision": 0.6923076923076923,
+                "recall": 0.9,
+                "f1-score": 0.782608695652174,
+                "support": 10.0
+            },
+            "Offensive Language": {
+                "precision": 0.75,
+                "recall": 0.9,
+                "f1-score": 0.8181818181818182,
+                "support": 10.0
+            },
+            "Neutral Language": {
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1-score": 0.6666666666666666,
+                "support": 10.0
+            },
+            "accuracy": 0.7666666666666667,
+            "macro avg": {
+                "precision": 0.8141025641025642,
+                "recall": 0.7666666666666666,
+                "f1-score": 0.7558190601668863,
+                "support": 30.0
+            },
+            "weighted avg": {
+                "precision": 0.8141025641025641,
+                "recall": 0.7666666666666667,
+                "f1-score": 0.7558190601668862,
+                "support": 30.0
+            }
+        },
+        "confusion_matrix": [
+            [
+                9,
+                1,
+                0
+            ],
+            [
+                1,
+                9,
+                0
+            ],
+            [
+                3,
+                2,
+                5
+            ]
+        ],
+        "hyperparameters": {
+            "C": 1.5,
+            "solver": "lbfgs",
+            "max_iter": 1000,
+            "class_weight": "balanced"
+        }
+    },
+    "decision_tree": {
+        "name": "Decision Tree Classifier",
+        "accuracy": 53.33,
+        "report": {
+            "Hate Speech": {
+                "precision": 0.5,
+                "recall": 0.2,
+                "f1-score": 0.2857142857142857,
+                "support": 10.0
+            },
+            "Offensive Language": {
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1-score": 0.6666666666666666,
+                "support": 10.0
+            },
+            "Neutral Language": {
+                "precision": 0.42857142857142855,
+                "recall": 0.9,
+                "f1-score": 0.5806451612903226,
+                "support": 10.0
+            },
+            "accuracy": 0.5333333333333333,
+            "macro avg": {
+                "precision": 0.6428571428571429,
+                "recall": 0.5333333333333333,
+                "f1-score": 0.5110087045570917,
+                "support": 30.0
+            },
+            "weighted avg": {
+                "precision": 0.6428571428571428,
+                "recall": 0.5333333333333333,
+                "f1-score": 0.5110087045570916,
+                "support": 30.0
+            }
+        },
+        "confusion_matrix": [
+            [
+                2,
+                0,
+                8
+            ],
+            [
+                1,
+                5,
+                4
+            ],
+            [
+                1,
+                0,
+                9
+            ]
+        ],
+        "hyperparameters": {
+            "max_depth": 15,
+            "criterion": "gini",
+            "class_weight": "balanced"
+        }
+    },
+    "preprocessing_pipeline": [
+        "Lowercase conversion",
+        "URL and Mention stripping (@user, #hashtag, https://)",
+        "Punctuation and special character removal",
+        "NLTK English Stopwords filtering",
+        "NLTK Snowball Stemming",
+        "CountVectorizer N-Gram (1, 2) Tokenization"
+    ]
+}
