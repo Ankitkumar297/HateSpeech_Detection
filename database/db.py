@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(DB_DIR, "predictions.db")
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_PATH = os.path.join("/tmp", "predictions.db")
+else:
+    DB_PATH = os.path.join(DB_DIR, "predictions.db")
 
 def get_db_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
@@ -13,7 +16,10 @@ def get_db_connection() -> sqlite3.Connection:
     return conn
 
 def init_db():
-    os.makedirs(DB_DIR, exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    except Exception:
+        pass
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
