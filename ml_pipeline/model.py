@@ -20,8 +20,12 @@ if PARENT_DIR not in sys.path:
 
 try:
     from ml_pipeline.preprocessor import TextPreprocessor
+    from ml_pipeline.config import HATE_OVERRIDE_THRESHOLD, BERT_ENSEMBLE_WEIGHT
+    from ml_pipeline.transformer import TransformerClassifier
 except ImportError:
     from preprocessor import TextPreprocessor  # type: ignore
+    from config import HATE_OVERRIDE_THRESHOLD, BERT_ENSEMBLE_WEIGHT  # type: ignore
+    from transformer import TransformerClassifier  # type: ignore
 
 CLASS_NAMES: Dict[int, str] = {
     0: "Hate Speech",
@@ -37,28 +41,36 @@ CLASS_SEVERITY: Dict[str, str] = {
 
 class HateSpeechClassifier:
     """
-    Inference engine that integrates TextPreprocessor, CountVectorizer,
-    and the trained ML Classifier.
+    Inference engine combining TF-IDF and a fine-tuned transformer.
     """
     def __init__(self, models_dir: str = "models"):
-        self.models_dir = models_dir
+        self.models_dir = models_dir if os.path.isabs(models_dir) else os.path.join(PARENT_DIR, models_dir)
         self.preprocessor = TextPreprocessor()
         self.vectorizer: Any = None
         self.classifier: Any = None
         self.decision_tree: Any = None
+        self.hate_vectorizer: Any = None
+        self.hate_classifier: Any = None
+        self.transformer: Any = None
         self.load_models()
 
     def load_models(self) -> None:
         vec_path = os.path.join(self.models_dir, "vectorizer.joblib")
         clf_path = os.path.join(self.models_dir, "classifier.joblib")
         dt_path = os.path.join(self.models_dir, "decision_tree.joblib")
+        hate_vec_path = os.path.join(self.models_dir, "hate_vectorizer.joblib")
+        hate_clf_path = os.path.join(self.models_dir, "hate_classifier.joblib")
+        bert_path = os.path.join(self.models_dir, "bert_tiny")
 
-        if os.path.exists(vec_path) and os.path.exists(clf_path):
+        if all(os.path.exists(path) for path in (vec_path, clf_path, hate_vec_path, hate_clf_path)):
             self.vectorizer = joblib.load(vec_path)
             self.classifier = joblib.load(clf_path)
+            self.hate_vectorizer = joblib.load(hate_vec_path)
+            self.hate_classifier = joblib.load(hate_clf_path)
+            self.transformer = TransformerClassifier(bert_path)
             if os.path.exists(dt_path):
                 self.decision_tree = joblib.load(dt_path)
-            print("ML Models and CountVectorizer loaded successfully.")
+            print("Three-class, transformer, and hate-risk models loaded successfully.")
         else:
             print("Models not found on disk. Initializing training...")
             try:
@@ -68,6 +80,9 @@ class HateSpeechClassifier:
             train_and_evaluate(output_dir=self.models_dir)
             self.vectorizer = joblib.load(vec_path)
             self.classifier = joblib.load(clf_path)
+            self.hate_vectorizer = joblib.load(hate_vec_path)
+            self.hate_classifier = joblib.load(hate_clf_path)
+            self.transformer = TransformerClassifier(bert_path)
             if os.path.exists(dt_path):
                 self.decision_tree = joblib.load(dt_path)
 
@@ -89,29 +104,26 @@ class HateSpeechClassifier:
         stemmed_text = self.preprocessor.tokenize_and_stem(text)
 
         if not stemmed_text.strip():
-            # If all words were filtered out (e.g. only symbols or single generic stopword)
-            return {
-                "prediction": "Neutral Language",
-                "label_id": 2,
-                "confidence": 95.0,
-                "severity": "success",
-                "color": "#10b981",
-                "probabilities": {
-                    "Hate Speech": 2.5,
-                    "Offensive Language": 2.5,
-                    "Neutral Language": 95.0
-                },
-                "clean_text": cleaned_text,
-                "stemmed_text": stemmed_text,
-                "tokens": self.preprocessor.get_token_details(text)
-            }
+            return {"error": "No analyzable words remain after preprocessing."}
 
-        # Vectorize
-        X_vec = self.vectorizer.transform([stemmed_text])
+        # The classifier uses unstemmed text so negation and nearby words remain available.
+        X_vec = self.vectorizer.transform([cleaned_text])
         
-        # Predict with Logistic Regression (with probability calibration)
-        probs = self.classifier.predict_proba(X_vec)[0]
+        base_probs = self.classifier.predict_proba(X_vec)[0]
+        bert_probs = self.transformer.predict_proba([cleaned_text])[0]
+        probs = (1 - BERT_ENSEMBLE_WEIGHT) * base_probs + BERT_ENSEMBLE_WEIGHT * bert_probs
         pred_idx = int(np.argmax(probs))
+        hate_risk = float(self.hate_classifier.predict_proba(
+            self.hate_vectorizer.transform([cleaned_text]))[0, 1])
+        if pred_idx != 0 and hate_risk >= HATE_OVERRIDE_THRESHOLD:
+            remaining = 1.0 - hate_risk
+            non_hate_total = float(probs[1] + probs[2])
+            probs = np.array([
+                hate_risk,
+                remaining * float(probs[1]) / non_hate_total,
+                remaining * float(probs[2]) / non_hate_total,
+            ])
+            pred_idx = 0
         confidence = float(probs[pred_idx]) * 100
 
         pred_label = CLASS_NAMES.get(pred_idx, "Neutral Language")
@@ -146,5 +158,6 @@ class HateSpeechClassifier:
             "clean_text": cleaned_text,
             "stemmed_text": stemmed_text,
             "tokens": self.preprocessor.get_token_details(text),
-            "dt_prediction": dt_pred
+            "dt_prediction": dt_pred,
+            "hate_risk": round(hate_risk * 100, 2)
         }

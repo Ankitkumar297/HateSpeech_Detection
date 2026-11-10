@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hate Speech & Toxicity Detector - NLP Web App</title>
+    <title>HateShield — Text review</title>
     <meta name="description" content="A machine learning web application to detect and classify hate speech, offensive language, and neutral text using NLP, Scikit-Learn, and Flask.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,10 +21,6 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Background Glow Effects -->
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-
     <!-- Navigation Header -->
     <header class="navbar-wrapper">
         <nav class="navbar container">
@@ -33,18 +29,17 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div class="brand-text">
-                    <span class="brand-name">HateShield<span class="brand-accent">.nlp</span></span>
-                    <span class="brand-tag">Content Moderation System</span>
+                    <span class="brand-name">HateShield</span>
+                    <span class="brand-tag">Text review tool</span>
                 </div>
             </a>
 
             <div class="nav-links" id="navLinks">
-                <a href="#detector" class="nav-link active"><i class="fa-solid fa-wand-magic-sparkles"></i> Detector</a>
-                <a href="#dashboard" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
-                <a href="#admin" class="nav-link"><i class="fa-solid fa-database"></i> Logs</a>
-                <a href="#model-info" class="nav-link"><i class="fa-solid fa-brain"></i> Model Details</a>
-                <a href="#about" class="nav-link"><i class="fa-solid fa-circle-info"></i> About Project</a>
-                <a href="#contact" class="nav-link"><i class="fa-solid fa-envelope"></i> Contact</a>
+                <a href="#detector" class="nav-link active">Detector</a>
+                <a href="#dashboard" class="nav-link">Analytics</a>
+                <a href="#admin" class="nav-link">Logs</a>
+                <a href="#model-info" class="nav-link">Model details</a>
+                <a href="#about" class="nav-link">About</a>
             </div>
 
             <div class="nav-actions">
@@ -52,10 +47,6 @@
                     <i class="fa-solid fa-moon theme-icon-dark"></i>
                     <i class="fa-solid fa-sun theme-icon-light"></i>
                 </button>
-                <a href="#detector" class="btn btn-primary btn-sm">
-                    <span>Try Detector</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
                 <button class="mobile-menu-toggle" id="mobileMenuBtn" aria-label="Open menu">
                     <i class="fa-solid fa-bars"></i>
                 </button>
@@ -68,50 +59,24 @@
         <!-- Hero Section -->
         <section class="hero-section" id="hero">
             <div class="container hero-container">
-                <div class="hero-badge">
-                    <span class="pulse-dot"></span>
-                    <span>NLP Machine Learning Project &bull; Python & Flask</span>
-                </div>
+                <div class="hero-badge">A practical tool for reviewing text</div>
                 <h1 class="hero-title">
-                    Automated <span class="gradient-text">Hate Speech</span> & Offensive Content Detection
+                    Understand the tone of a message <span class="gradient-text">before you act.</span>
                 </h1>
                 <p class="hero-description">
-                    An interactive Natural Language Processing tool that classifies social media text and comments into <strong>Hate Speech</strong>, <strong>Offensive Language</strong>, or <strong>Neutral Content</strong> using CountVectorizer and trained Scikit-Learn classifiers.
+                    Paste English text to see whether the model reads it as hate speech, offensive language, or neutral. Use the result as a starting point for review.
                 </p>
 
                 <div class="hero-cta-group">
                     <a href="#detector" class="btn btn-primary btn-lg">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>Test A Sentence</span>
+                        <span>Try the detector</span>
                     </a>
                     <a href="#model-info" class="btn btn-secondary btn-lg">
-                        <i class="fa-solid fa-chart-simple"></i>
-                        <span>View Model Metrics</span>
+                        <span>How it works</span>
                     </a>
                 </div>
 
-                <!-- Metrics Strip -->
-                <div class="hero-metrics-strip">
-                    <div class="metric-item">
-                        <div class="metric-val">3 Classes</div>
-                        <div class="metric-lbl">Multi-Class NLP</div>
-                    </div>
-                    <div class="metric-divider"></div>
-                    <div class="metric-item">
-                        <div class="metric-val">NLTK + Sklearn</div>
-                        <div class="metric-lbl">Stemming & CountVec</div>
-                    </div>
-                    <div class="metric-divider"></div>
-                    <div class="metric-item">
-                        <div class="metric-val">&lt; 50ms</div>
-                        <div class="metric-lbl">Response Time</div>
-                    </div>
-                    <div class="metric-divider"></div>
-                    <div class="metric-item">
-                        <div class="metric-val">SQLite Log</div>
-                        <div class="metric-lbl">Audit History</div>
-                    </div>
-                </div>
+                <p class="hero-note"><span class="note-line"></span> Three labels · Measured on held-out data · Human review recommended</p>
             </div>
         </section>
 
@@ -119,9 +84,9 @@
         <section class="detector-section" id="detector">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-magnifying-glass"></i> Interactive Studio</div>
-                    <h2 class="section-title">Live Text Analysis & Classification</h2>
-                    <p class="section-subtitle">Type or paste any sentence, tweet, or comment to test the trained machine learning pipeline.</p>
+                    <div class="section-badge">01 / Detector</div>
+                    <h2 class="section-title">Check a message</h2>
+                    <p class="section-subtitle">Paste a sentence or comment. You'll get a label, model scores, and the text breakdown.</p>
                 </div>
 
                 <div class="detector-grid">
@@ -129,8 +94,7 @@
                     <div class="detector-card card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fa-solid fa-keyboard text-primary"></i>
-                                <span>Input Text</span>
+                                <span>Your text</span>
                             </div>
                             <div class="card-tools">
                                 <button class="tool-btn" id="clearTextBtn" title="Clear text">
@@ -142,16 +106,16 @@
                         <div class="card-body">
                             <!-- Quick Test Prompts -->
                             <div class="sample-prompts-wrapper">
-                                <span class="sample-label"><i class="fa-solid fa-lightbulb"></i> Quick Test:</span>
+                                <span class="sample-label">Try an example</span>
                                 <div class="sample-chips">
                                     <button class="sample-chip chip-hate" data-sample="Go back to your country you filthy immigrants, you do not belong here!">
-                                        🔴 Hate Speech Sample
+                                        Targeted hate
                                     </button>
                                     <button class="sample-chip chip-offensive" data-sample="Shut the fuck up you annoying idiot, nobody asked for your opinion!">
-                                        🟠 Offensive Sample
+                                        Offensive language
                                     </button>
                                     <button class="sample-chip chip-neutral" data-sample="Good morning everyone! Wishing you all a productive and joyful week ahead.">
-                                        🟢 Neutral Sample
+                                        Neutral message
                                     </button>
                                 </div>
                             </div>
@@ -161,7 +125,7 @@
                                 <textarea 
                                     id="userInputText" 
                                     class="detector-textarea" 
-                                    placeholder="Enter or paste social media post, comment, or statement to inspect for hate speech or offensive content..."
+                                    placeholder="Paste the message you want to review..."
                                     rows="6"
                                     maxlength="5000"
                                 ></textarea>
@@ -178,9 +142,9 @@
                             <!-- Detect Button -->
                             <div class="detector-actions">
                                 <button class="btn btn-primary btn-block" id="detectBtn">
-                                    <span class="btn-text"><i class="fa-solid fa-shield-virus"></i> Detect Toxicity & Hate Speech</span>
+                                    <span class="btn-text">Analyze text <i class="fa-solid fa-arrow-right"></i></span>
                                     <span class="btn-loader" style="display: none;">
-                                        <i class="fa-solid fa-spinner fa-spin"></i> Processing NLP Pipeline...
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Analyzing...
                                     </span>
                                 </button>
                             </div>
@@ -197,20 +161,19 @@
                     <div class="result-card card" id="resultCard">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fa-solid fa-microchip text-primary"></i>
-                                <span>Prediction Verdict</span>
+                                <span>Analysis</span>
                             </div>
-                            <span class="live-pill"><span class="pulse-dot"></span> Ready</span>
+                            <span class="live-pill">Ready</span>
                         </div>
 
                         <div class="card-body">
                             <!-- Placeholder state when no prediction is made yet -->
                             <div class="result-placeholder" id="resultPlaceholder">
                                 <div class="placeholder-icon">
-                                    <i class="fa-solid fa-robot"></i>
+                                    <i class="fa-regular fa-comment-dots"></i>
                                 </div>
-                                <h3>No Content Evaluated Yet</h3>
-                                <p>Enter text or select a test sample above, then click <strong>"Detect"</strong> to see multi-class predictions, confidence, and linguistic tokens.</p>
+                                <h3>Your result will appear here</h3>
+                                <p>Enter text on the left and select Analyze text. Review the label alongside its score and context.</p>
                             </div>
 
                             <!-- Active Result Display Container -->
@@ -221,20 +184,20 @@
                                         <i class="fa-solid fa-triangle-exclamation" id="verdictIcon"></i>
                                     </div>
                                     <div class="verdict-info">
-                                        <div class="verdict-label">Classification Result</div>
+                                        <div class="verdict-label">Model result</div>
                                         <h3 class="verdict-class" id="verdictClass">Neutral Content</h3>
                                         <div class="verdict-desc" id="verdictDesc">Safe for public viewing.</div>
                                     </div>
                                     <div class="confidence-badge" id="confidenceBadge">
                                         <span class="conf-num" id="confidencePercent">98.5%</span>
-                                        <span class="conf-lbl">Confidence</span>
+                                        <span class="conf-lbl">Model score</span>
                                     </div>
                                 </div>
 
                                 <!-- Confidence Progress Bar -->
                                 <div class="confidence-meter-box">
                                     <div class="meter-labels">
-                                        <span>Model Confidence Level</span>
+                                        <span>Score for this label</span>
                                         <strong id="confidenceBarText">98.5%</strong>
                                     </div>
                                     <div class="meter-track">
@@ -244,7 +207,7 @@
 
                                 <!-- Multiclass Probability Breakdown -->
                                 <div class="probabilities-box">
-                                    <h4 class="prob-title"><i class="fa-solid fa-chart-column"></i> Multi-Class Probability Distribution</h4>
+                                    <h4 class="prob-title">Scores by label</h4>
                                     
                                     <!-- Hate Speech Row -->
                                     <div class="prob-row">
@@ -283,7 +246,7 @@
                                 <!-- NLP Preprocessing Breakdown -->
                                 <div class="nlp-breakdown-box">
                                     <div class="nlp-breakdown-toggle" id="nlpToggle">
-                                        <span><i class="fa-solid fa-code-fork"></i> View Preprocessed Tokens & Snowball Stems</span>
+                                        <span>View text breakdown</span>
                                         <i class="fa-solid fa-chevron-down toggle-arrow"></i>
                                     </div>
                                     <div class="nlp-tokens-content" id="nlpTokensContent">
@@ -304,11 +267,11 @@
                                 <div class="result-actions">
                                     <button class="btn btn-outline" id="downloadPdfBtn">
                                         <i class="fa-solid fa-file-pdf text-danger"></i>
-                                        <span>Download PDF Report</span>
+                                        <span>Download report</span>
                                     </button>
                                     <button class="btn btn-outline" id="copyResultBtn">
                                         <i class="fa-solid fa-copy"></i>
-                                        <span>Copy Verdict</span>
+                                        <span>Copy result</span>
                                     </button>
                                 </div>
                             </div>
@@ -318,74 +281,13 @@
             </div>
         </section>
 
-        <!-- Features Showcase Section -->
-        <section class="features-section" id="features">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-cubes"></i> Core Capabilities</div>
-                    <h2 class="section-title">Engineered for Accuracy, Speed & Safety</h2>
-                    <p class="section-subtitle">Everything required for enterprise-grade automated content moderation and compliance logging.</p>
-                </div>
-
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon bg-danger-subtle text-danger">
-                            <i class="fa-solid fa-shield-virus"></i>
-                        </div>
-                        <h3>3-Tier Classification</h3>
-                        <p>Distinguishes targeted hate speech against protected identity groups from colloquial offensive profanity and benign civil discourse.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon bg-primary-subtle text-primary">
-                            <i class="fa-solid fa-microchip"></i>
-                        </div>
-                        <h3>CountVectorizer & Stemming</h3>
-                        <p>Combines N-Gram (1,2) token frequency matrix representations with NLTK Snowball Stemmer for high semantic recall.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon bg-warning-subtle text-warning">
-                            <i class="fa-solid fa-gauge-high"></i>
-                        </div>
-                        <h3>Calibrated Confidence</h3>
-                        <p>Probabilistic outputs indicate certainty levels with transparent class likelihoods across all 3 classification dimensions.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon bg-success-subtle text-success">
-                            <i class="fa-solid fa-file-shield"></i>
-                        </div>
-                        <h3>PDF Audit Certificates</h3>
-                        <p>Generate verifiable, formatted compliance PDFs and export full prediction datasets directly to CSV.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon bg-purple-subtle text-purple">
-                            <i class="fa-solid fa-database"></i>
-                        </div>
-                        <h3>SQLite Audit Persistence</h3>
-                        <p>Automatic database logging stores inputs, confidence, predictions, and timestamp metadata for historical accountability.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon bg-info-subtle text-info">
-                            <i class="fa-solid fa-moon"></i>
-                        </div>
-                        <h3>Adaptive Dark / Light Theme</h3>
-                        <p>Precision-crafted glassmorphism styling with seamless theme switching and responsive mobile-first ergonomics.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Statistics & Analytics Dashboard Section -->
         <section class="dashboard-section" id="dashboard">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-chart-line"></i> Live Analytics</div>
-                    <h2 class="section-title">Detection Statistics & Intelligence Dashboard</h2>
-                    <p class="section-subtitle">Real-time telemetry and classification distribution metrics across all processed submissions.</p>
+                    <div class="section-badge">02 / Analytics</div>
+                    <h2 class="section-title">What the model has seen</h2>
+                    <p class="section-subtitle">A simple view of the predictions saved on this device.</p>
                 </div>
 
                 <!-- 4 Top Counters -->
@@ -470,14 +372,17 @@
         <section class="admin-section" id="admin">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-user-shield"></i> Administration</div>
-                    <h2 class="section-title">Moderation Audit Logs & Records</h2>
+                    <div class="section-badge">03 / Records</div>
+                    <h2 class="section-title">Prediction history</h2>
                     <p class="section-subtitle">Inspect recorded predictions, filter by category, search text, delete entries, and export CSV files.</p>
                 </div>
 
                 <div class="admin-card card">
                     <div class="card-header admin-toolbar">
                         <div class="admin-filters">
+                            <div class="search-box">
+                                <input type="password" id="adminApiKey" placeholder="Admin API key" autocomplete="off" aria-label="Admin API key" />
+                            </div>
                             <div class="search-box">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                                 <input type="text" id="adminSearchInput" placeholder="Search user text..." />
@@ -496,9 +401,9 @@
                             <button class="btn btn-secondary btn-sm" id="refreshAdminBtn">
                                 <i class="fa-solid fa-arrows-rotate"></i> Refresh
                             </button>
-                            <a href="/api/export/csv" class="btn btn-outline btn-sm" id="exportCsvBtn" download>
+                            <button type="button" class="btn btn-outline btn-sm" id="exportCsvBtn">
                                 <i class="fa-solid fa-file-arrow-down text-success"></i> Export CSV
-                            </a>
+                            </button>
                         </div>
                     </div>
 
@@ -544,9 +449,9 @@
         <section class="model-info-section" id="model-info">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-brain"></i> Transparent AI</div>
-                    <h2 class="section-title">Model Architecture & Benchmark Metrics</h2>
-                    <p class="section-subtitle">Complete technical documentation of the machine learning algorithms, dataset structure, and pipeline.</p>
+                    <div class="section-badge">04 / Model</div>
+                    <h2 class="section-title">How the model works</h2>
+                    <p class="section-subtitle">The training approach and results, including where this model can be wrong.</p>
                 </div>
 
                 <!-- Pipeline Diagram / Steps -->
@@ -558,18 +463,18 @@
                     </div>
                     <div class="pipeline-step">
                         <div class="step-num">02</div>
-                        <h4>NLTK Stopwords & Stemming</h4>
-                        <p>Filters out high-frequency noise words while applying <code>SnowballStemmer("english")</code> to reduce inflectional forms.</p>
+                        <h4>Context Preservation</h4>
+                        <p>Keeps common words and negation in the classifier input. Token stemming is displayed separately for inspection.</p>
                     </div>
                     <div class="pipeline-step">
                         <div class="step-num">03</div>
-                        <h4>CountVectorizer Extraction</h4>
-                        <p>Constructs unigram + bigram <code>(1, 2)</code> sparse feature vectors capturing critical phrase combinations and contexts.</p>
+                        <h4>TF-IDF Extraction</h4>
+                        <p>Constructs word <code>(1, 2)</code> and character <code>(3, 5)</code> gram features to cover phrases and spelling variants.</p>
                     </div>
                     <div class="pipeline-step">
                         <div class="step-num">04</div>
-                        <h4>Multi-Class ML Classifier</h4>
-                        <p>Evaluates log-odds probabilities with balanced class weighting to assign calibrated confidence across 3 categories.</p>
+                        <h4>Model Ensemble</h4>
+                        <p>Combines three-class TF-IDF and BERT predictions, then applies a conservative hate-risk check trained on a second dataset.</p>
                     </div>
                 </div>
 
@@ -579,22 +484,30 @@
                         <div class="card-header">
                             <div class="card-title">
                                 <i class="fa-solid fa-square-root-variable text-primary"></i>
-                                <span>Logistic Regression (Primary)</span>
+                                <span>Combined Classifier (Primary)</span>
                             </div>
                             <span class="badge badge-success">Production Model</span>
                         </div>
                         <div class="card-body">
                             <p class="mb-3">
-                                Multi-class Logistic Regression with Softmax probability calibration. Highly effective for high-dimensional sparse text vectors, delivering superior generalization on nuanced language.
+                                TF-IDF and BERT-tiny are combined with an independently trained hate-risk check. The safeguard catches some direct hate but also creates false positives; errors remain possible on unfamiliar wording.
                             </p>
                             <div class="metric-row-list">
                                 <div class="metric-row">
                                     <span>Accuracy:</span>
-                                    <strong class="text-success" id="lrAccuracyVal">96.8%</strong>
+                                    <strong class="text-success" id="lrAccuracyVal">Loading...</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Ensemble without hate review:</span>
+                                    <strong id="ensembleAccuracyVal">Loading...</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>BERT weight:</span>
+                                    <strong>20%</strong>
                                 </div>
                                 <div class="metric-row">
                                     <span>Regularization Parameter (C):</span>
-                                    <strong>1.5</strong>
+                                    <strong>0.5</strong>
                                 </div>
                                 <div class="metric-row">
                                     <span>Solver Algorithm:</span>
@@ -623,11 +536,11 @@
                             <div class="metric-row-list">
                                 <div class="metric-row">
                                     <span>Accuracy:</span>
-                                    <strong class="text-warning" id="dtAccuracyVal">92.5%</strong>
+                                    <strong class="text-warning" id="dtAccuracyVal">Loading...</strong>
                                 </div>
                                 <div class="metric-row">
                                     <span>Max Tree Depth:</span>
-                                    <strong>15</strong>
+                                    <strong>25</strong>
                                 </div>
                                 <div class="metric-row">
                                     <span>Split Criterion:</span>
@@ -683,9 +596,9 @@
         <section class="about-section" id="about">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-code-branch"></i> Project Overview</div>
-                    <h2 class="section-title">About HateShield NLP</h2>
-                    <p class="section-subtitle">Understanding the engineering methodology and practical motivations behind this content moderation system.</p>
+                    <div class="section-badge">05 / About</div>
+                    <h2 class="section-title">About this project</h2>
+                    <p class="section-subtitle">An experimental classifier for exploring text moderation.</p>
                 </div>
 
                 <div class="about-grid">
@@ -696,7 +609,7 @@
                                 Online platforms often struggle to differentiate between casual coarse language (slang, venting, mild profanity) and targeted hate speech directed at identity groups. 
                             </p>
                             <p>
-                                This project follows the taxonomy established in NLP research (such as Davidson et al., 2017) to separate <strong>Hate Speech</strong> from <strong>Offensive Language</strong> and <strong>Neutral Discussions</strong>. By leveraging NLTK Snowball Stemmer with n-gram tokenization and multi-class Logistic Regression, the system achieves balanced precision while preserving explainability.
+                                This project uses labeled HateXplain and DynaHate data to distinguish <strong>Hate Speech</strong>, <strong>Offensive Language</strong>, and <strong>Neutral Discussions</strong>. TF-IDF and a fine-tuned BERT-tiny model feed the classifier. The reported accuracy is measured on held-out HateXplain posts; new wording can still be misclassified.
                             </p>
                             <div class="about-highlights">
                                 <div class="highlight-point"><i class="fa-solid fa-check text-success"></i> Real-time multi-class probabilistic scoring</div>
@@ -730,44 +643,6 @@
             </div>
         </section>
 
-        <!-- Contact & Feedback Section -->
-        <section class="contact-section" id="contact">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-badge"><i class="fa-solid fa-paper-plane"></i> Contact & Feedback</div>
-                    <h2 class="section-title">Send Feedback or Questions</h2>
-                    <p class="section-subtitle">Interested in the model architecture or have suggestions for vocabulary improvements?</p>
-                </div>
-
-                <div class="contact-card card">
-                    <div class="card-body">
-                        <form id="contactForm" onsubmit="event.preventDefault(); window.handleContactSubmit();">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="contactName">Name</label>
-                                    <input type="text" id="contactName" class="form-input" placeholder="Your name" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="contactEmail">Email</label>
-                                    <input type="email" id="contactEmail" class="form-input" placeholder="your.email@example.com" required />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="contactSubject">Subject</label>
-                                <input type="text" id="contactSubject" class="form-input" placeholder="e.g. Model performance or feature request" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="contactMessage">Message</label>
-                                <textarea id="contactMessage" class="form-input" rows="4" placeholder="Write your comments or questions here..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary" id="contactSubmitBtn">
-                                <i class="fa-solid fa-paper-plane"></i> Send Feedback
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Footer -->
@@ -777,8 +652,8 @@
                 <div class="logo-icon sm">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <span class="footer-title">HateShield.nlp</span>
-                <p>An open-source NLP content classification project for hate speech and offensive language detection.</p>
+                <span class="footer-title">HateShield</span>
+                <p>A text review project. Predictions are a starting point, not a final moderation decision.</p>
             </div>
             <div class="footer-links">
                 <h4>Navigation</h4>
@@ -789,7 +664,7 @@
             </div>
             <div class="footer-compliance">
                 <h4>Status</h4>
-                <div class="status-badge"><span class="status-dot green"></span> NLP Pipeline Active</div>
+                <div class="status-badge"><span class="status-dot green"></span> Local model ready</div>
                 <div class="copyright">&copy; 2026 HateShield Project &bull; Built with Python & Flask</div>
             </div>
         </div>

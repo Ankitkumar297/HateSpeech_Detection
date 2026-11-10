@@ -3,6 +3,11 @@ import sys
 import io
 import csv
 import json
+import hmac
+import html
+import secrets
+from datetime import datetime
+from functools import wraps
 from typing import Any, Dict, List
 
 # Ensure app directory is in sys.path
@@ -11,7 +16,6 @@ if APP_DIR not in sys.path:
     sys.path.insert(0, APP_DIR)
 
 from flask import Flask, render_template, request, jsonify, Response, send_file  # type: ignore
-from flask_cors import CORS  # type: ignore
 from ml_pipeline.model import HateSpeechClassifier
 from database.db import (
     init_db,
@@ -33,7 +37,26 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-CORS(app)
+
+def admin_required(view):
+    @wraps(view)
+    def guarded(*args, **kwargs):
+        expected = os.environ.get("ADMIN_API_KEY", "")
+        supplied = request.headers.get("X-Admin-Key", "")
+        if not expected or not hmac.compare_digest(supplied, expected):
+            return jsonify({"success": False, "error": "Admin access required."}), 403
+        return view(*args, **kwargs)
+    return guarded
+
+def pagination(default_limit):
+    try:
+        limit = int(request.args.get("limit", default_limit))
+        offset = int(request.args.get("offset", 0))
+    except (TypeError, ValueError):
+        return None
+    if not 1 <= limit <= 100 or offset < 0:
+        return None
+    return limit, offset
 
 # Initialize Database & ML Model
 init_db()
@@ -46,6 +69,8 @@ def index():
 @app.route("/api/predict", methods=["POST"])
 def api_predict():
     data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict) or not isinstance(data.get("text", ""), str):
+        return jsonify({"success": False, "error": "Text must be a string."}), 400
     text = data.get("text", "").strip()
 
     if not text:
@@ -74,9 +99,12 @@ def api_predict():
     return jsonify(result)
 
 @app.route("/api/history", methods=["GET"])
+@admin_required
 def api_history():
-    limit = request.args.get("limit", 10, type=int)
-    offset = request.args.get("offset", 0, type=int)
+    page = pagination(10)
+    if page is None:
+        return jsonify({"success": False, "error": "Limit must be 1–100 and offset must be nonnegative."}), 400
+    limit, offset = page
     search = request.args.get("search", None, type=str)
     category = request.args.get("category", None, type=str)
     
@@ -89,9 +117,12 @@ def api_stats():
     return jsonify({"success": True, **stats_data})
 
 @app.route("/api/admin/predictions", methods=["GET"])
+@admin_required
 def api_admin_predictions():
-    limit = request.args.get("limit", 20, type=int)
-    offset = request.args.get("offset", 0, type=int)
+    page = pagination(20)
+    if page is None:
+        return jsonify({"success": False, "error": "Limit must be 1–100 and offset must be nonnegative."}), 400
+    limit, offset = page
     search = request.args.get("search", None, type=str)
     category = request.args.get("category", None, type=str)
 
@@ -99,6 +130,7 @@ def api_admin_predictions():
     return jsonify({"success": True, **data})
 
 @app.route("/api/admin/predictions/<int:prediction_id>", methods=["DELETE"])
+@admin_required
 def api_delete_prediction(prediction_id):
     deleted = delete_prediction(prediction_id)
     if deleted:
@@ -106,6 +138,7 @@ def api_delete_prediction(prediction_id):
     return jsonify({"success": False, "error": "Record not found or already deleted."}), 404
 
 @app.route("/api/export/csv", methods=["GET"])
+@admin_required
 def api_export_csv():
     records = get_all_for_export()
     
@@ -114,7 +147,10 @@ def api_export_csv():
     writer.writerow(["ID", "Timestamp", "Prediction", "Confidence (%)", "User Text"])
     
     for r in records:
-        writer.writerow([r["id"], r["timestamp"], r["prediction"], r["confidence"], r["user_text"]])
+        user_text = r["user_text"]
+        if user_text.lstrip().startswith(("=", "+", "-", "@")):
+            user_text = "'" + user_text
+        writer.writerow([r["id"], r["timestamp"], r["prediction"], r["confidence"], user_text])
     
     output.seek(0)
     return Response(
@@ -128,13 +164,20 @@ def api_export_pdf():
     if not REPORTLAB_AVAILABLE:
         return jsonify({"success": False, "error": "PDF generator library not installed."}), 500
 
-    data = request.get_json(silent=True) or {}
-    text = data.get("text", "N/A")
-    prediction = data.get("prediction", "Neutral Language")
-    confidence = data.get("confidence", 0.0)
-    probabilities = data.get("probabilities", {})
-    timestamp = data.get("timestamp", "N/A")
-    pred_id = data.get("id", "N/A")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get("text"), str):
+        return jsonify({"success": False, "error": "Text must be a string."}), 400
+    text = data["text"].strip()
+    if not text or len(text) > 5000:
+        return jsonify({"success": False, "error": "Text must contain 1–5000 characters."}), 400
+    result = classifier.predict(text)
+    if "error" in result:
+        return jsonify({"success": False, "error": result["error"]}), 400
+    prediction = result["prediction"]
+    confidence = result["confidence"]
+    probabilities = result["probabilities"]
+    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    report_id = secrets.token_hex(6)
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
@@ -182,14 +225,14 @@ def api_export_pdf():
     
     # Header
     elements.append(Paragraph("🛡️ Hate Speech Detection System - Analysis Certificate", title_style))
-    elements.append(Paragraph(f"Official NLP Classification & Safety Verification Report | ID: #{pred_id}", subtitle_style))
+    elements.append(Paragraph(f"NLP Classification Report | Reference: {report_id}", subtitle_style))
     elements.append(HRFlowable(width="100%", thickness=1.5, color=brand_primary, spaceBefore=5, spaceAfter=15))
 
     # Meta Table
     meta_data = [
-        [Paragraph("<b>Report Generated:</b>", body_style), Paragraph(str(timestamp), body_style)],
-        [Paragraph("<b>Status Classification:</b>", body_style), Paragraph(f"<font color='{badge_color.hexval()}'><b>{prediction.upper()}</b></font>", body_style)],
-        [Paragraph("<b>Classification Confidence:</b>", body_style), Paragraph(f"<b>{confidence}%</b>", body_style)]
+        [Paragraph("<b>Report Generated:</b>", body_style), Paragraph(html.escape(str(timestamp)), body_style)],
+        [Paragraph("<b>Status Classification:</b>", body_style), Paragraph(f"<font color='{badge_color.hexval()}'><b>{html.escape(str(prediction).upper())}</b></font>", body_style)],
+        [Paragraph("<b>Classification Confidence:</b>", body_style), Paragraph(f"<b>{html.escape(str(confidence))}%</b>", body_style)]
     ]
     meta_table = Table(meta_data, colWidths=[160, 370])
     meta_table.setStyle(TableStyle([
@@ -202,7 +245,7 @@ def api_export_pdf():
 
     # Analyzed Content Box
     elements.append(Paragraph("<b>Input Content Analyzed:</b>", styles['Heading3']))
-    content_p = Paragraph(f'<i>"{text}"</i>', body_style)
+    content_p = Paragraph(f'<i>"{html.escape(str(text))}"</i>', body_style)
     content_table = Table([[content_p]], colWidths=[530])
     content_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f1f5f9")),
@@ -233,7 +276,7 @@ def api_export_pdf():
     elements.append(Spacer(1, 20))
 
     # Footer note
-    footer_text = "This report was generated autonomously by the Hate Speech Detection AI Pipeline powered by CountVectorizer and Multi-Class Logistic Regression. Verified for compliance and audit logging."
+    footer_text = "This report was generated by trained text classifiers. Model output can be wrong and should be reviewed by a human before moderation decisions."
     elements.append(Paragraph(footer_text, ParagraphStyle('FooterStyle', parent=styles['Italic'], fontSize=9, textColor=colors.HexColor("#94a3b8"))))
 
     doc.build(elements)
@@ -242,39 +285,21 @@ def api_export_pdf():
     return send_file(
         buffer,
         as_attachment=True,
-        download_name=f"Hate_Speech_Report_{pred_id}.pdf",
+        download_name=f"Hate_Speech_Report_{report_id}.pdf",
         mimetype="application/pdf"
     )
 
 @app.route("/api/model/info", methods=["GET"])
 def api_model_info():
-    metrics_path = os.path.join("models", "metrics.json")
+    metrics_path = os.path.join(APP_DIR, "models", "metrics.json")
     if os.path.exists(metrics_path):
         with open(metrics_path, "r") as f:
             metrics_data = json.load(f)
         return jsonify({"success": True, **metrics_data})
     
-    # Return default metadata structure if not yet generated
-    return jsonify({
-        "success": True,
-        "dataset_info": {
-            "total_samples": 96,
-            "classes": {0: "Hate Speech", 1: "Offensive Language", 2: "Neutral Language"},
-            "vocabulary_size": 1200
-        },
-        "logistic_regression": {
-            "name": "Logistic Regression (Primary Classifier)",
-            "accuracy": 96.2,
-            "hyperparameters": {"C": 1.5, "solver": "lbfgs", "class_weight": "balanced"}
-        },
-        "decision_tree": {
-            "name": "Decision Tree Classifier",
-            "accuracy": 92.5,
-            "hyperparameters": {"max_depth": 15, "criterion": "gini"}
-        }
-    })
+    return jsonify({"success": False, "error": "Model metrics are not available."}), 503
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting Hate Speech Detection Server on http://127.0.0.1:{port}")
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="127.0.0.1", port=port, debug=False)

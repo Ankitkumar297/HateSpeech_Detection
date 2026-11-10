@@ -19,3 +19,10 @@ database/*.db
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Local comparison artifacts from model research
+.runtime/
+models/contextual/
+models/minilm_hate/
+models/bert_tiny_experiment/
+training_data/davidson.csv

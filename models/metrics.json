@@ -1,143 +1,622 @@
 {
-    "dataset_info": {
-        "total_samples": 150,
-        "classes": {
-            "0": "Hate Speech",
-            "1": "Offensive Language",
-            "2": "Neutral Language"
-        },
-        "class_counts": {
-            "Hate Speech": 50,
-            "Offensive Language": 50,
-            "Neutral Language": 50
-        },
-        "vocabulary_size": 1459
+  "dataset_info": {
+    "source": "HateXplain (Mathew et al., AAAI 2021)",
+    "source_url": "https://github.com/hate-alert/HateXplain",
+    "additional_source": "DynaHate (Vidgen et al., ACL 2021)",
+    "additional_source_url": "https://github.com/bvidgen/Dynamically-Generated-Hate-Speech-Dataset",
+    "total_samples": 17305,
+    "test_samples": 1924,
+    "classes": {
+      "0": "Hate Speech",
+      "1": "Offensive Language",
+      "2": "Neutral Language"
     },
+    "class_counts": {
+      "Hate Speech": 5341,
+      "Offensive Language": 4932,
+      "Neutral Language": 7032
+    },
+    "vocabulary_size": 93287
+  },
+  "logistic_regression": {
+    "name": "TF-IDF Logistic Regression",
+    "accuracy": 67.0,
+    "report": {
+      "Hate Speech": {
+        "precision": 0.734094616639478,
+        "recall": 0.7575757575757576,
+        "f1-score": 0.7456503728251864,
+        "support": 594.0
+      },
+      "Offensive Language": {
+        "precision": 0.5231660231660231,
+        "recall": 0.49452554744525545,
+        "f1-score": 0.5084427767354597,
+        "support": 548.0
+      },
+      "Neutral Language": {
+        "precision": 0.7162673392181589,
+        "recall": 0.7263427109974424,
+        "f1-score": 0.7212698412698413,
+        "support": 782.0
+      },
+      "accuracy": 0.66995841995842,
+      "macro avg": {
+        "precision": 0.6578426596745534,
+        "recall": 0.6594813386728186,
+        "f1-score": 0.6584543302768292,
+        "support": 1924.0
+      },
+      "weighted avg": {
+        "precision": 0.6667714356795378,
+        "recall": 0.66995841995842,
+        "f1-score": 0.6681787832547862,
+        "support": 1924.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        450,
+        98,
+        46
+      ],
+      [
+        98,
+        271,
+        179
+      ],
+      [
+        65,
+        149,
+        568
+      ]
+    ]
+  },
+  "transformer": {
+    "name": "Fine-tuned BERT-tiny",
+    "accuracy": 66.22,
+    "report": {
+      "Hate Speech": {
+        "precision": 0.685131195335277,
+        "recall": 0.7912457912457912,
+        "f1-score": 0.734375,
+        "support": 594.0
+      },
+      "Offensive Language": {
+        "precision": 0.5791044776119403,
+        "recall": 0.354014598540146,
+        "f1-score": 0.43941109852774635,
+        "support": 548.0
+      },
+      "Neutral Language": {
+        "precision": 0.6755260243632336,
+        "recall": 0.7800511508951407,
+        "f1-score": 0.7240356083086054,
+        "support": 782.0
+      },
+      "accuracy": 0.6621621621621622,
+      "macro avg": {
+        "precision": 0.646587232436817,
+        "recall": 0.6417705135603593,
+        "f1-score": 0.6326072356121172,
+        "support": 1924.0
+      },
+      "weighted avg": {
+        "precision": 0.6510283444971655,
+        "recall": 0.6621621621621622,
+        "f1-score": 0.6461600195896748,
+        "support": 1924.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        470,
+        48,
+        76
+      ],
+      [
+        137,
+        194,
+        217
+      ],
+      [
+        79,
+        93,
+        610
+      ]
+    ]
+  },
+  "ensemble": {
+    "name": "TF-IDF and BERT-tiny ensemble",
+    "bert_weight": 0.2,
+    "accuracy": 67.83,
+    "report": {
+      "Hate Speech": {
+        "precision": 0.7351524879614767,
+        "recall": 0.7710437710437711,
+        "f1-score": 0.752670501232539,
+        "support": 594.0
+      },
+      "Offensive Language": {
+        "precision": 0.5504385964912281,
+        "recall": 0.458029197080292,
+        "f1-score": 0.5,
+        "support": 548.0
+      },
+      "Neutral Language": {
+        "precision": 0.7053254437869823,
+        "recall": 0.7621483375959079,
+        "f1-score": 0.7326367547633682,
+        "support": 782.0
+      },
+      "accuracy": 0.6782744282744283,
+      "macro avg": {
+        "precision": 0.6636388427465624,
+        "recall": 0.6637404352399904,
+        "f1-score": 0.6617690853319691,
+        "support": 1924.0
+      },
+      "weighted avg": {
+        "precision": 0.6704186204613983,
+        "recall": 0.6782744282744283,
+        "f1-score": 0.6725614448841383,
+        "support": 1924.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        458,
+        80,
+        56
+      ],
+      [
+        104,
+        251,
+        193
+      ],
+      [
+        61,
+        125,
+        596
+      ]
+    ]
+  },
+  "primary_model": {
+    "name": "TF-IDF and BERT-tiny with binary hate review",
+    "bert_weight": 0.2,
+    "hate_override_threshold": 0.97,
+    "accuracy": 66.58,
+    "report": {
+      "Hate Speech": {
+        "precision": 0.6993957703927492,
+        "recall": 0.7794612794612794,
+        "f1-score": 0.7372611464968153,
+        "support": 594.0
+      },
+      "Offensive Language": {
+        "precision": 0.5317647058823529,
+        "recall": 0.4124087591240876,
+        "f1-score": 0.4645426515930113,
+        "support": 548.0
+      },
+      "Neutral Language": {
+        "precision": 0.7072879330943848,
+        "recall": 0.7570332480818415,
+        "f1-score": 0.7313156269302038,
+        "support": 782.0
+      },
+      "accuracy": 0.6658004158004158,
+      "macro avg": {
+        "precision": 0.646149469789829,
+        "recall": 0.6496344288890695,
+        "f1-score": 0.6443731416733435,
+        "support": 1924.0
+      },
+      "weighted avg": {
+        "precision": 0.6548582692913885,
+        "recall": 0.6658004158004158,
+        "f1-score": 0.6571680428022338,
+        "support": 1924.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        463,
+        78,
+        53
+      ],
+      [
+        130,
+        226,
+        192
+      ],
+      [
+        69,
+        121,
+        592
+      ]
+    ]
+  },
+  "decision_tree": {
+    "name": "TF-IDF Decision Tree",
+    "accuracy": 62.27,
+    "report": {
+      "Hate Speech": {
+        "precision": 0.7140255009107468,
+        "recall": 0.6599326599326599,
+        "f1-score": 0.6859142607174104,
+        "support": 594.0
+      },
+      "Offensive Language": {
+        "precision": 0.4885654885654886,
+        "recall": 0.42883211678832117,
+        "f1-score": 0.45675413022351796,
+        "support": 548.0
+      },
+      "Neutral Language": {
+        "precision": 0.6387024608501118,
+        "recall": 0.7301790281329923,
+        "f1-score": 0.6813842482100239,
+        "support": 782.0
+      },
+      "accuracy": 0.6226611226611226,
+      "macro avg": {
+        "precision": 0.6137644834421158,
+        "recall": 0.6063146016179911,
+        "f1-score": 0.6080175463836507,
+        "support": 1924.0
+      },
+      "weighted avg": {
+        "precision": 0.6191945736276813,
+        "recall": 0.6226611226611226,
+        "f1-score": 0.6188029190898483,
+        "support": 1924.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        392,
+        105,
+        97
+      ],
+      [
+        87,
+        235,
+        226
+      ],
+      [
+        70,
+        141,
+        571
+      ]
+    ]
+  },
+  "validation": {
     "logistic_regression": {
-        "name": "Logistic Regression (Primary Classifier)",
-        "accuracy": 76.67,
-        "report": {
-            "Hate Speech": {
-                "precision": 0.6923076923076923,
-                "recall": 0.9,
-                "f1-score": 0.782608695652174,
-                "support": 10.0
-            },
-            "Offensive Language": {
-                "precision": 0.75,
-                "recall": 0.9,
-                "f1-score": 0.8181818181818182,
-                "support": 10.0
-            },
-            "Neutral Language": {
-                "precision": 1.0,
-                "recall": 0.5,
-                "f1-score": 0.6666666666666666,
-                "support": 10.0
-            },
-            "accuracy": 0.7666666666666667,
-            "macro avg": {
-                "precision": 0.8141025641025642,
-                "recall": 0.7666666666666666,
-                "f1-score": 0.7558190601668863,
-                "support": 30.0
-            },
-            "weighted avg": {
-                "precision": 0.8141025641025641,
-                "recall": 0.7666666666666667,
-                "f1-score": 0.7558190601668862,
-                "support": 30.0
-            }
+      "accuracy": 66.13,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.7390572390572391,
+          "recall": 0.7403035413153457,
+          "f1-score": 0.7396798652064027,
+          "support": 593.0
         },
-        "confusion_matrix": [
-            [
-                9,
-                1,
-                0
-            ],
-            [
-                1,
-                9,
-                0
-            ],
-            [
-                3,
-                2,
-                5
-            ]
-        ],
-        "hyperparameters": {
-            "C": 1.5,
-            "solver": "lbfgs",
-            "max_iter": 1000,
-            "class_weight": "balanced"
+        "Offensive Language": {
+          "precision": 0.5365384615384615,
+          "recall": 0.5091240875912408,
+          "f1-score": 0.5224719101123596,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.6844059405940595,
+          "recall": 0.708066581306018,
+          "f1-score": 0.6960352422907489,
+          "support": 781.0
+        },
+        "accuracy": 0.6612903225806451,
+        "macro avg": {
+          "precision": 0.6533338803965867,
+          "recall": 0.6524980700708682,
+          "f1-score": 0.6527290058698371,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6591077311591989,
+          "recall": 0.6612903225806451,
+          "f1-score": 0.6600147195827496,
+          "support": 1922.0
         }
+      },
+      "confusion_matrix": [
+        [
+          439,
+          73,
+          81
+        ],
+        [
+          95,
+          279,
+          174
+        ],
+        [
+          60,
+          168,
+          553
+        ]
+      ]
     },
     "decision_tree": {
-        "name": "Decision Tree Classifier",
-        "accuracy": 53.33,
-        "report": {
-            "Hate Speech": {
-                "precision": 0.5,
-                "recall": 0.2,
-                "f1-score": 0.2857142857142857,
-                "support": 10.0
-            },
-            "Offensive Language": {
-                "precision": 1.0,
-                "recall": 0.5,
-                "f1-score": 0.6666666666666666,
-                "support": 10.0
-            },
-            "Neutral Language": {
-                "precision": 0.42857142857142855,
-                "recall": 0.9,
-                "f1-score": 0.5806451612903226,
-                "support": 10.0
-            },
-            "accuracy": 0.5333333333333333,
-            "macro avg": {
-                "precision": 0.6428571428571429,
-                "recall": 0.5333333333333333,
-                "f1-score": 0.5110087045570917,
-                "support": 30.0
-            },
-            "weighted avg": {
-                "precision": 0.6428571428571428,
-                "recall": 0.5333333333333333,
-                "f1-score": 0.5110087045570916,
-                "support": 30.0
-            }
+      "accuracy": 60.82,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.7197696737044146,
+          "recall": 0.6323777403035413,
+          "f1-score": 0.6732495511669659,
+          "support": 593.0
         },
-        "confusion_matrix": [
-            [
-                2,
-                0,
-                8
-            ],
-            [
-                1,
-                5,
-                4
-            ],
-            [
-                1,
-                0,
-                9
-            ]
-        ],
-        "hyperparameters": {
-            "max_depth": 15,
-            "criterion": "gini",
-            "class_weight": "balanced"
+        "Offensive Language": {
+          "precision": 0.4745011086474501,
+          "recall": 0.3905109489051095,
+          "f1-score": 0.42842842842842843,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.6105263157894737,
+          "recall": 0.7426376440460948,
+          "f1-score": 0.6701328711727326,
+          "support": 781.0
+        },
+        "accuracy": 0.6082206035379812,
+        "macro avg": {
+          "precision": 0.6015990327137795,
+          "recall": 0.5885087777515818,
+          "f1-score": 0.590603616922709,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6054480107581162,
+          "recall": 0.6082206035379812,
+          "f1-score": 0.6021797788796533,
+          "support": 1922.0
         }
+      },
+      "confusion_matrix": [
+        [
+          375,
+          97,
+          121
+        ],
+        [
+          85,
+          214,
+          249
+        ],
+        [
+          61,
+          140,
+          580
+        ]
+      ]
     },
-    "preprocessing_pipeline": [
-        "Lowercase conversion",
-        "URL and Mention stripping (@user, #hashtag, https://)",
-        "Punctuation and special character removal",
-        "NLTK English Stopwords filtering",
-        "NLTK Snowball Stemming",
-        "CountVectorizer N-Gram (1, 2) Tokenization"
-    ]
+    "combined": {
+      "accuracy": 65.56,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.712,
+          "recall": 0.7504215851602024,
+          "f1-score": 0.7307060755336617,
+          "support": 593.0
+        },
+        "Offensive Language": {
+          "precision": 0.5365853658536586,
+          "recall": 0.48175182481751827,
+          "f1-score": 0.5076923076923077,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.684472049689441,
+          "recall": 0.70550576184379,
+          "f1-score": 0.694829760403531,
+          "support": 781.0
+        },
+        "accuracy": 0.6555671175858481,
+        "macro avg": {
+          "precision": 0.6443524718476998,
+          "recall": 0.6458930572738368,
+          "f1-score": 0.6444093812098334,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6507999226302073,
+          "recall": 0.6555671175858481,
+          "f1-score": 0.6525422113850177,
+          "support": 1922.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          445,
+          67,
+          81
+        ],
+        [
+          111,
+          264,
+          173
+        ],
+        [
+          69,
+          161,
+          551
+        ]
+      ]
+    },
+    "transformer": {
+      "accuracy": 67.12,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.7210365853658537,
+          "recall": 0.7976391231028668,
+          "f1-score": 0.7574059247397918,
+          "support": 593.0
+        },
+        "Offensive Language": {
+          "precision": 0.5959885386819485,
+          "recall": 0.3795620437956204,
+          "f1-score": 0.463768115942029,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.6641221374045801,
+          "recall": 0.7797695262483995,
+          "f1-score": 0.7173144876325088,
+          "support": 781.0
+        },
+        "accuracy": 0.6711758584807492,
+        "macro avg": {
+          "precision": 0.6603824204841274,
+          "recall": 0.6523235643822956,
+          "f1-score": 0.6461628427714432,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6622558811824331,
+          "recall": 0.6711758584807492,
+          "f1-score": 0.6573929530426211,
+          "support": 1922.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          473,
+          44,
+          76
+        ],
+        [
+          108,
+          208,
+          232
+        ],
+        [
+          75,
+          97,
+          609
+        ]
+      ]
+    },
+    "ensemble": {
+      "accuracy": 68.31,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.7483660130718954,
+          "recall": 0.7723440134907251,
+          "f1-score": 0.7601659751037344,
+          "support": 593.0
+        },
+        "Offensive Language": {
+          "precision": 0.5787139689578714,
+          "recall": 0.4762773722627737,
+          "f1-score": 0.5225225225225225,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.6915017462165308,
+          "recall": 0.7605633802816901,
+          "f1-score": 0.724390243902439,
+          "support": 781.0
+        },
+        "accuracy": 0.6831425598335068,
+        "macro avg": {
+          "precision": 0.6728605760820993,
+          "recall": 0.669728255345063,
+          "f1-score": 0.669026247176232,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6768882229634018,
+          "recall": 0.6831425598335068,
+          "f1-score": 0.6778717721470665,
+          "support": 1922.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          458,
+          57,
+          78
+        ],
+        [
+          100,
+          261,
+          187
+        ],
+        [
+          54,
+          133,
+          594
+        ]
+      ]
+    },
+    "ensemble_with_hate_review": {
+      "accuracy": 67.64,
+      "report": {
+        "Hate Speech": {
+          "precision": 0.721183800623053,
+          "recall": 0.7807757166947723,
+          "f1-score": 0.7497975708502024,
+          "support": 593.0
+        },
+        "Offensive Language": {
+          "precision": 0.5788235294117647,
+          "recall": 0.4489051094890511,
+          "f1-score": 0.5056526207605344,
+          "support": 548.0
+        },
+        "Neutral Language": {
+          "precision": 0.6912280701754386,
+          "recall": 0.7567221510883483,
+          "f1-score": 0.7224938875305623,
+          "support": 781.0
+        },
+        "accuracy": 0.676378772112383,
+        "macro avg": {
+          "precision": 0.6637451334034187,
+          "recall": 0.6621343257573905,
+          "f1-score": 0.6593146930470998,
+          "support": 1922.0
+        },
+        "weighted avg": {
+          "precision": 0.6684216496847738,
+          "recall": 0.676378772112383,
+          "f1-score": 0.6690922590282581,
+          "support": 1922.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          463,
+          52,
+          78
+        ],
+        [
+          116,
+          246,
+          186
+        ],
+        [
+          63,
+          127,
+          591
+        ]
+      ]
+    }
+  },
+  "evaluation_note": "Accuracy is measured on HateXplain's held-out test posts, not arbitrary new text.",
+  "preprocessing_pipeline": [
+    "Lowercase and remove URLs/mentions",
+    "Preserve stopwords and negation",
+    "Word 1-2 grams and character 3-5 grams",
+    "TF-IDF weighting",
+    "BERT-tiny wordpiece context model"
+  ]
 }

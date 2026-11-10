@@ -20,8 +20,8 @@ function initThemeEngine() {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const htmlEl = document.documentElement;
 
-    // Load saved theme or default to dark
-    const savedTheme = localStorage.getItem('safeguard_theme') || 'dark';
+    // Load saved theme or use the default light canvas
+    const savedTheme = localStorage.getItem('safeguard_theme') || 'light';
     htmlEl.setAttribute('data-theme', savedTheme);
 
     themeToggleBtn?.addEventListener('click', () => {
@@ -113,6 +113,10 @@ function initDetectorStudio() {
     // Download PDF Certificate
     downloadPdfBtn?.addEventListener('click', async () => {
         if (!latestPredictionData) return;
+        if (textarea.value.trim() !== latestPredictionData.user_text) {
+            showToast('Text changed. Run detection again before downloading.', 'warning');
+            return;
+        }
         downloadPdfBtn.disabled = true;
         downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
 
@@ -121,12 +125,7 @@ function initDetectorStudio() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: latestPredictionData.id || Math.floor(Math.random() * 9000 + 1000),
-                    text: textarea.value,
-                    prediction: latestPredictionData.prediction,
-                    confidence: latestPredictionData.confidence,
-                    probabilities: latestPredictionData.probabilities,
-                    timestamp: new Date().toLocaleString()
+                    text: latestPredictionData.user_text
                 })
             });
 
@@ -243,20 +242,20 @@ function renderPredictionResult(data) {
     // Set Verdict Classes & Colors
     banner.className = 'verdict-banner';
     let iconClass = 'fa-circle-check';
-    let descText = 'Safe for public consumption and community discourse.';
+    let descText = 'No harmful pattern detected by the model. Review context before making a decision.';
 
     if (data.prediction === 'Hate Speech') {
         banner.classList.add('verdict-danger');
         iconClass = 'fa-triangle-exclamation';
-        descText = 'Severe violation: Targeted hate speech and toxicity detected.';
+        descText = 'The model flagged possible targeted hate. Review the context before acting.';
     } else if (data.prediction === 'Offensive Language') {
         banner.classList.add('verdict-warning');
         iconClass = 'fa-comment-slash';
-        descText = 'Warning: Profanity, vulgarity, or coarse insults detected.';
+        descText = 'The model found language that may be offensive. Review the context.';
     } else {
         banner.classList.add('verdict-success');
         iconClass = 'fa-circle-check';
-        descText = 'Approved: Content adheres to standard safety guidelines.';
+        descText = 'No harmful pattern detected by the model. Review context before making a decision.';
     }
 
     verdictClass.textContent = data.prediction;
@@ -508,11 +507,29 @@ let adminSearchQuery = '';
 let adminCategoryFilter = 'All';
 
 function initAdminPanel() {
+    const adminKeyInput = document.getElementById('adminApiKey');
+    const exportBtn = document.getElementById('exportCsvBtn');
     const searchInput = document.getElementById('adminSearchInput');
     const categorySelect = document.getElementById('adminCategoryFilter');
     const refreshBtn = document.getElementById('refreshAdminBtn');
     const prevPageBtn = document.getElementById('prevPageBtn');
     const nextPageBtn = document.getElementById('nextPageBtn');
+
+    adminKeyInput?.addEventListener('change', () => refreshAdminTable());
+    exportBtn?.addEventListener('click', async () => {
+        const key = adminKeyInput?.value || '';
+        if (!key) { showToast('Enter the admin API key first', 'warning'); return; }
+        try {
+            const res = await fetch('/api/export/csv', { headers: { 'X-Admin-Key': key } });
+            if (!res.ok) throw new Error('Admin access denied');
+            const url = URL.createObjectURL(await res.blob());
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'hate_speech_predictions_report.csv';
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (err) { showToast(err.message, 'danger'); }
+    });
 
     searchInput?.addEventListener('input', debounce((e) => {
         adminSearchQuery = e.target.value.trim();
@@ -547,6 +564,7 @@ function initAdminPanel() {
 }
 
 async function refreshAdminTable() {
+    const key = document.getElementById('adminApiKey')?.value || '';
     const tableBody = document.getElementById('adminTableBody');
     const paginationInfo = document.getElementById('paginationInfo');
     const currentPageBadge = document.getElementById('currentPageBadge');
@@ -554,6 +572,10 @@ async function refreshAdminTable() {
     const nextBtn = document.getElementById('nextPageBtn');
 
     if (!tableBody) return;
+    if (!key) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Enter the admin API key to view records.</td></tr>';
+        return;
+    }
 
     const offset = (adminCurrentPage - 1) * adminPageSize;
     const url = new URL('/api/admin/predictions', window.location.origin);
@@ -563,9 +585,12 @@ async function refreshAdminTable() {
     if (adminCategoryFilter && adminCategoryFilter !== 'All') url.searchParams.set('category', adminCategoryFilter);
 
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
-        if (!res.ok || !data.success) return;
+        if (!res.ok || !data.success) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Admin access denied.</td></tr>';
+            return;
+        }
 
         const items = data.items || [];
         const total = data.total || 0;
@@ -625,7 +650,8 @@ window.handleDeleteRecord = async function(id) {
     if (!confirm(`Are you sure you want to delete prediction record #${id}?`)) return;
 
     try {
-        const res = await fetch(`/api/admin/predictions/${id}`, { method: 'DELETE' });
+        const key = document.getElementById('adminApiKey')?.value || '';
+        const res = await fetch(`/api/admin/predictions/${id}`, { method: 'DELETE', headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         if (data.success) {
             showToast(`Record #${id} deleted`, 'success');
@@ -650,10 +676,14 @@ async function initModelInfo() {
         if (!res.ok || !data.success) return;
 
         const lrAcc = document.getElementById('lrAccuracyVal');
+        const ensembleAcc = document.getElementById('ensembleAccuracyVal');
         const dtAcc = document.getElementById('dtAccuracyVal');
 
-        if (lrAcc && data.logistic_regression?.accuracy) {
-            lrAcc.textContent = `${data.logistic_regression.accuracy}%`;
+        if (lrAcc && data.primary_model?.accuracy) {
+            lrAcc.textContent = `${data.primary_model.accuracy}%`;
+        }
+        if (ensembleAcc && data.ensemble?.accuracy) {
+            ensembleAcc.textContent = `${data.ensemble.accuracy}%`;
         }
         if (dtAcc && data.decision_tree?.accuracy) {
             dtAcc.textContent = `${data.decision_tree.accuracy}%`;
@@ -664,14 +694,8 @@ async function initModelInfo() {
 }
 
 /* ==========================================================================
-   6. Contact & Mobile Navigation Utilities
+   6. Mobile Navigation Utilities
    ========================================================================== */
-window.handleContactSubmit = function() {
-    const name = document.getElementById('contactName')?.value;
-    const form = document.getElementById('contactForm');
-    showToast(`Thank you, ${name || 'User'}! Your message has been received.`, 'success');
-    if (form) form.reset();
-};
 
 function initMobileNav() {
     const mobileBtn = document.getElementById('mobileMenuBtn');

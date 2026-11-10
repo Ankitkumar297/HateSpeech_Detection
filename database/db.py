@@ -5,10 +5,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-    DB_PATH = os.path.join("/tmp", "predictions.db")
-else:
-    DB_PATH = os.path.join(DB_DIR, "predictions.db")
+DB_PATH = os.path.abspath(os.environ.get("DATABASE_PATH", os.path.join(DB_DIR, "predictions.db")))
 
 def get_db_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
@@ -16,6 +13,9 @@ def get_db_connection() -> sqlite3.Connection:
     return conn
 
 def init_db():
+    if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        raise RuntimeError("SQLite audit storage requires a persistent shared filesystem; serverless temporary storage is unsupported.")
+    is_new_database = not os.path.exists(DB_PATH)
     try:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     except Exception:
@@ -38,10 +38,10 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON predictions(timestamp)")
     conn.commit()
 
-    # Seed realistic initial data if table is empty
+    # Seed only on first creation, never after records have been deleted.
     cursor.execute("SELECT COUNT(*) FROM predictions")
     count = cursor.fetchone()[0]
-    if count == 0:
+    if is_new_database and count == 0:
         seed_sample_data(conn)
     conn.close()
 
